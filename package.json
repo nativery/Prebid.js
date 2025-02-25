@@ -14,8 +14,10 @@
   },
   "scripts": {
     "serve": "gulp serve",
-    "test": "gulp test",
-    "lint": "gulp lint"
+    "test": "gulp test --nolint --file \"test/spec/modules/nativeryBidAdapter_spec.js\"",
+    "lint": "gulp lint",
+    "fastserve": "gulp serve --modules=modules.json --notest --nolint",
+    "fastbuild": "gulp build --modules=modules.json --notest --nolint"
   },
   "repository": {
     "type": "git",
