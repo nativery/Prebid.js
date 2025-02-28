@@ -25,6 +25,7 @@ const converter = ortbConverter({
   },
   imp(buildImp, bidRequest, context) {
     const imp = buildImp(bidRequest, context);
+    imp.tagid = bidRequest.adUnitCode;
     deepSetValue(imp, `ext.${BIDDER_CODE}`, {
       widgetId: bidRequest.params.widgetId,
     });
@@ -99,20 +100,18 @@ function formatRequest(ortbPayload) {
     const clonedPayload = deepClone(ortbPayload);
     chunk(ortbPayload.imp, MAX_IMPS_PER_REQUEST).forEach((imps) => {
       clonedPayload.imp = imps;
-      const payloadString = JSON.stringify(clonedPayload);
       request.push({
         method: 'POST',
         url: ENDPOINT,
-        data: payloadString,
+        data: clonedPayload,
         options,
       });
     });
   } else {
-    const payloadString = JSON.stringify(ortbPayload);
     request = {
       method: 'POST',
       url: ENDPOINT,
-      data: payloadString,
+      data: ortbPayload,
       options,
     };
   }
