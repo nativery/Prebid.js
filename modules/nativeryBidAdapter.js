@@ -1,6 +1,12 @@
 import { BANNER, NATIVE, VIDEO } from '../src/mediaTypes.js';
 import { chunk } from '../libraries/chunk/chunk.js';
-import { deepAccess, deepClone, deepSetValue, logWarn } from '../src/utils.js';
+import {
+  deepAccess,
+  deepClone,
+  deepSetValue,
+  logError,
+  logWarn,
+} from '../src/utils.js';
 import { ortbConverter } from '../libraries/ortbConverter/converter.js';
 import { registerBidder } from '../src/adapters/bidderFactory.js';
 
@@ -17,7 +23,7 @@ const TTL = 30;
 const MAX_IMPS_PER_REQUEST = 10;
 const GVLID = 1133;
 
-const converter = ortbConverter({
+export const converter = ortbConverter({
   context: {
     netRevenue: true,
     ttl: TTL,
@@ -71,20 +77,28 @@ export const spec = {
     if (!serverResponse.body || typeof serverResponse.body !== 'object') {
       return [];
     }
-    // Response from PBS Go openRTB
-    if (Array.isArray(serverResponse.body?.seatbid)) {
-      const responseErrors = deepAccess(
-        serverResponse.body,
-        'ext.errors.nativery'
-      );
-      if (Array.isArray(responseErrors) && responseErrors.length > 0) {
-        logWarn('Nativery: Error in bid response ' + JSON.stringify(responseErrors));
+    try {
+      // Response from PBS Go openRTB
+      if (Array.isArray(serverResponse.body?.seatbid)) {
+        const responseErrors = deepAccess(
+          serverResponse.body,
+          'ext.errors.nativery'
+        );
+        if (Array.isArray(responseErrors) && responseErrors.length > 0) {
+          logWarn(
+            'Nativery: Error in bid response ' + JSON.stringify(responseErrors)
+          );
+        }
+        const ortb = converter.fromORTB({
+          request: bidderRequest.data,
+          response: serverResponse.body,
+        });
+        return ortb.bids ?? [];
       }
-      const ortb = converter.fromORTB({
-        request: bidderRequest.data,
-        response: serverResponse.body,
-      });
-      return ortb.bids ?? [];
+    } catch (error) {
+      const errMsg = error?.message ?? JSON.stringify(error);
+      logError('Nativery: unhandled error in bid response ' + errMsg);
+      return [];
     }
     return [];
   },
