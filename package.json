@@ -15,6 +15,7 @@
   "scripts": {
     "serve": "gulp serve",
     "test": "gulp test --nolint --file \"test/spec/modules/nativeryBidAdapter_spec.js\"",
+    "test-cov": "gulp test-coverage --nolint --file \"test/spec/modules/nativeryBidAdapter_spec.js\" && gulp view-coverage",
     "lint": "gulp lint",
     "fastserve": "gulp serve --modules=modules.json --notest --nolint",
     "fastbuild": "gulp build --modules=modules.json --notest --nolint"
